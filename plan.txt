@@ -1,0 +1,297 @@
+# Customer Intelligence Agent — Build Plan
+
+## Context
+
+We are building a **Customer Intelligence Agent**: an assistant that, given a query like
+_"Give me a summary of this customer,"_ produces a concise, well-structured view of a
+customer's activity, issues/complaints, and key insights — and supports conversational
+follow-ups ("Why is this customer at risk?").
+
+The design docs (PRD/class design + DB design) specify a 7-module platform
+(Data Integration, Summary Generation, AI Assistant/RAG, Risk Analysis, Smart Alerts,
+Analytics, Administration) with ~34 entities. The target directory
+`C:\Users\TARUN\Downloads\CB-PROJ` is **empty** — this is a greenfield build.
+
+**Decisions locked in with the user:**
+- **Scope:** Vertical-slice PoC — go *deep* on Summary, RAG Chat, Risk+Explainability, and
+  Timeline; the full data model is created but Alerts / Analytics / Admin UI ship as thin
+  stubs on top of real tables.
+- **Data:** Synthetic seed data (fully demoable); ingestion is a pluggable connector
+  interface so real CRM/Zendesk connectors slot in later.
+- **Differentiators (all four):** Customer 360 Timeline, Explainable risk (SHAP-style factor
+  breakdown), Intent + model router (LiteLLM: Ollama→HF fallback), and Multi-agent + Neo4j
+  memory graph.
+- **Backend split:** **Supabase Cloud** owns the database (Postgres), **Auth**, **Storage**,
+  **pgvector**, and RLS + auto CRUD/read APIs. A **FastAPI** service handles only what
+  Supabase can't: RAG, LLM routing, summary generation, scoring, timeline, and agents. The
+  Next.js frontend talks to both (Supabase directly for auth/simple reads, FastAPI for AI).
+- **Vector store:** **Supabase pgvector** (Qdrant dropped) — one database for structured +
+  vector data.
+
+**Outcome:** The frontend + FastAPI AI service run via Docker Compose against a hosted
+Supabase project. A user logs in (Supabase Auth), browses customers, and for any customer
+sees an AI summary, a chronological timeline, an explainable risk score, and a chat assistant
+grounded in that customer's data.
+
+---
+
+## Architecture Overview
+
+```
+                     Next.js (App Router, TS, Tailwind, shadcn/ui)
+                     @supabase/supabase-js (auth + simple reads)
+                        │                              │
+             Supabase JWT│                     REST (JWT)│
+                        ▼                              ▼
+        ┌──────── Supabase Cloud ────────┐   ┌──────── FastAPI (AI layer) ────────┐
+        │  Postgres (34 tables, truth)   │   │ Intent Router →                    │
+        │  Auth (users, JWT, RLS)        │◄──┤  {Structured | RAG | Reason | Agent}│
+        │  Storage (PDFs/transcripts)    │   │ services: summary · rag · scoring · │
+        │  pgvector (Doc_Chunk embeds)   │   │   timeline · graph · agents · llm   │
+        └────────────────────────────────┘   └───┬───────────────┬───────────────┘
+                  ▲  service-role / conn string   │               │
+                  └───────────────────────────────┘        ┌──────▼─────┐  ┌──────▼──────┐
+                                                            │   Neo4j    │  │   Ollama    │
+                                                            │  (memory   │  │ qwen3:8b +  │
+                                                            │   graph)   │  │  bge-m3     │
+                                                            └────────────┘  └──────┬──────┘
+                                                                                   │ fallback
+                                                                            ┌──────▼──────┐
+                                                                            │ HF Inference│
+                                                                            └─────────────┘
+   Docker Compose runs: frontend, backend(FastAPI), ollama, neo4j, redis(optional).
+   Supabase is hosted (cloud). BGE-M3 embeddings stored in Supabase pgvector.
+```
+
+**Model routing (LiteLLM):** query-rewrite/classification → local 3–8B; summaries → local
+8–14B; complex reasoning → larger HF model; on local timeout/error → HF Inference fallback.
+
+---
+
+## Tech Stack (confirmed)
+
+| Layer | Choice | Notes |
+|---|---|---|
+| Frontend | Next.js + TS + Tailwind + shadcn/ui | App Router; `@supabase/ssr` |
+| Auth | **Supabase Auth** | JWT verified by FastAPI (JWKS); RLS in Postgres |
+| DB | **Supabase Cloud Postgres 15** | source of truth, 34 tables |
+| Vector | **Supabase pgvector** | `Doc_Chunk.embedding vector(1024)` (BGE-M3) |
+| Storage | **Supabase Storage** | PDFs/transcripts |
+| AI backend | FastAPI (Python 3.11+) | talks to Supabase via `supabase-py` + conn string |
+| Migrations | Supabase CLI (`supabase/migrations`) | SQL migrations + RLS policies in repo |
+| Graph DB | Neo4j 5 Community (Docker) | memory graph (Supabase has no graph) |
+| LLM runtime | Ollama | `qwen3:8b` (fallback `gemma3:12b`) |
+| Embeddings | BGE-M3 via `ollama pull bge-m3` | LlamaIndex `OllamaEmbedding` (1024-dim) |
+| RAG | LlamaIndex | pgvector store + retriever + reranker + chat engine |
+| Routing | LiteLLM (Router, library mode) | Ollama primary, HF fallback |
+| Jobs | Celery + Redis (optional) | embeddings/scoring/sync; inline fallback |
+| Deploy | Docker Compose | frontend + backend + ollama + neo4j (+ redis) |
+
+---
+
+## Repository Structure
+
+```
+CB-PROJ/
+├─ docker-compose.yml            # frontend, backend, ollama, neo4j, (redis)
+├─ .env.example                  # SUPABASE_URL, SUPABASE_ANON_KEY,
+│                                #   SUPABASE_SERVICE_ROLE_KEY, DB conn, HF_TOKEN, ...
+├─ README.md
+├─ supabase/
+│  ├─ config.toml
+│  ├─ migrations/                # SQL: 34 tables + pgvector + RLS policies
+│  └─ seed.sql / seed runner     # (or Python seeder in backend)
+├─ backend/
+│  ├─ Dockerfile  pyproject.toml
+│  └─ app/
+│     ├─ main.py                 # FastAPI app, router mounts, CORS
+│     ├─ core/                   # config, supabase client, DB session,
+│     │                          #   supabase-JWT verify dep, logging
+│     ├─ models/                 # SQLAlchemy (read/write) mirroring Supabase schema
+│     ├─ schemas/                # Pydantic request/response
+│     ├─ api/routers/            # customers, summary, chat, risk, timeline,
+│     │                          #   alerts(stub), analytics(stub), admin, ingest
+│     ├─ services/
+│     │  ├─ ingestion/           # Connector ABC + SyntheticConnector + sync_log
+│     │  ├─ llm/                 # litellm router, prompts, model config
+│     │  ├─ rag/                 # pgvector index, retriever, reranker, chat engine
+│     │  ├─ summary/             # template-driven sectioned summary generator
+│     │  ├─ scoring/             # weighted health/churn + explainability factors
+│     │  ├─ timeline/            # cross-table chronological aggregator
+│     │  ├─ graph/               # neo4j sync + cypher queries
+│     │  └─ agents/              # intent router + support/sales/finance + planner
+│     ├─ workers/                # celery tasks (optional)
+│     └─ seed/                   # synthetic data generator + runner
+└─ frontend/
+   ├─ Dockerfile  package.json  next.config.js  tailwind.config.ts
+   └─ src/
+      ├─ app/                    # /login, /(dashboard), /customers/[id]
+      ├─ components/             # shadcn ui + Timeline, RiskBars, ChatPanel, SummaryCard
+      └─ lib/                    # supabase client, api client, types
+```
+
+---
+
+## Data Model
+
+Model the DB-design entities as **Supabase SQL migrations** (`supabase/migrations/`),
+grouped by the 7 modules, keeping the exact attributes from the design docs. SQLAlchemy
+models in `backend/app/models/` mirror the schema for the FastAPI service's reads/writes.
+
+- **Customer Data Retrieval** — `Customer, Data_Source, Field_Mapping, Sync_Log, Interaction,
+  Ticket, Ticket_Message, Product, Order, Order_Item, Subscription, Doc_Chunk`
+- **Summarisation** — `Summary_Template, Summary, Summary_Section`
+- **Assistant** — `Assistant_Config, Conversation, Message`
+- **Risk** — `Scoring_Model, Score, Risk_Factor`
+- **Alerts** — `Alert_Rule, Alert, Notification_Channel, Alert_Notification`
+- **Analytics** — `Report_Template, Report`
+- **Admin** — `User, Role, Permission, User_Role, Role_Permission, Audit_Log,
+  Data_Source_Credential`
+
+Relationships per the design (1:M and M:M via `Order_Item`, `Alert_Notification`,
+`User_Role`, `Role_Permission`).
+
+- **Vector (pgvector):** enable `create extension vector`; `Doc_Chunk.embedding vector(1024)`
+  with an IVFFlat/HNSW index. Per-customer retrieval = SQL `WHERE customer_id = ...` +
+  `ORDER BY embedding <=> query`. LlamaIndex uses the pgvector/Supabase vector store.
+- **Auth mapping:** Supabase `auth.users` ↔ app `User` row (via a `profiles`/`User` table
+  keyed on the Supabase UID); `Role/Permission` tables drive app authorization; **RLS**
+  policies enforce row access at the DB.
+
+**Graph (Neo4j):** nodes `Customer, Product, Feature, Ticket, User, Subscription`; edges
+`BOUGHT, COMPLAINED_ABOUT, USES_FEATURE, SPOKE_WITH, HAS_RISK_FACTOR, RENEWS_ON`. Synced from
+Supabase Postgres after seeding. Enables _"everyone complaining about Feature A"_ via Cypher.
+
+---
+
+## Synthetic Seed Data (`backend/app/seed/`)
+
+Generate a realistic, internally-consistent dataset so the app demos end-to-end:
+- ~25 customers across segments/regions/lifecycle stages, with owners (Users).
+- Per customer: interactions, 0–8 tickets (+ messages with sentiment), orders + items,
+  a subscription (MRR, renewal date), and knowledge docs (transcripts/notes) for RAG.
+- Deliberately seed a few **at-risk** customers (usage↓, payment delay, negative sentiment,
+  renewal soon) so risk explainability and timeline tell a clear story.
+- Seed `Scoring_Model` (weighted formula), `Summary_Template` per team, `Assistant_Config`,
+  roles/permissions (Admin, CSM, Sales, Support), `Alert_Rule`s.
+- Create matching Supabase Auth users for the seeded app Users.
+- After Postgres seed: compute BGE-M3 embeddings into `Doc_Chunk.embedding` (pgvector) and
+  sync the Neo4j graph.
+
+Run via `python -m app.seed.run` (Supabase service-role key for writes).
+
+---
+
+## Backend Design (FastAPI AI layer — key services)
+
+**Auth** (`core/security.py`): verify Supabase JWT (JWKS/`SUPABASE_JWT_SECRET`), map the
+Supabase UID → app `User`, resolve roles/permissions for endpoint guards; write `Audit_Log`
+on sensitive actions. Frontend also uses Supabase RLS directly for simple reads.
+
+**Intent router** (`services/agents/router.py`): classify each query into
+`structured | rag | reasoning | agent-plan` via the local small model (LiteLLM); dispatch
+accordingly.
+
+**LLM router** (`services/llm/router.py`): LiteLLM `Router` = Ollama (`ollama/qwen3:8b`)
+primary + HF Inference fallback; per-task model map + timeout → automatic fallback. Central
+`complete()` / `chat()` helpers used everywhere.
+
+**RAG** (`services/rag/`): LlamaIndex over Supabase pgvector, per-customer filter, reranker,
+chat engine with memory persisted to `Conversation`/`Message`; responses carry source
+citations. Powers the assistant + follow-ups.
+
+**Summary** (`services/summary/`): pick `Summary_Template` by team → assemble structured facts
+(activity aggregates, open/negative tickets, orders, subscription, current risk) + top RAG
+context → LLM produces sectioned output (**Activity, Issues, Insights, Recommendations**) →
+persist `Summary` + `Summary_Section` with citations + a confidence level from data coverage.
+
+**Scoring + explainability** (`services/scoring/`): transparent weighted model (usage trend,
+payment/billing delay, ticket volume & sentiment, login recency, renewal proximity,
+competitor mentions). Store `Score` (health/churn, risk_level) + one `Risk_Factor` row per
+feature with `weight` + `contribution` → SHAP-style bar breakdown and the _"why at risk?"_
+answer. Rule/weight-based (not black-box) so explanation is native.
+
+**Timeline** (`services/timeline/`): union of dated events across tickets, orders,
+subscription changes, interactions, sentiment shifts, score changes → sorted feed → also
+injected as chronological context into summary/chat prompts.
+
+**Agents** (`services/agents/`): specialists — Support (tickets/sentiment), Sales
+(orders/subscription/upsell), Finance (billing/renewal) — each sees only its data slice; a
+Planner synthesizes a combined brief (e.g. _"prepare tomorrow's meeting"_). LlamaIndex
+function-calling agents over the LiteLLM router.
+
+---
+
+## Frontend Design
+
+- `/login` — Supabase Auth (`@supabase/ssr`).
+- `/(dashboard)` — customer list with segment/risk filters + summary tiles (reads via
+  Supabase client, RLS-guarded).
+- `/customers/[id]` — **Customer 360** with tabs:
+  - **Summary** — sectioned AI summary card (team selector), confidence badge, citations.
+  - **Timeline** — vertical chronological event feed (highest-ROI view).
+  - **Risk** — health/churn gauges + horizontal **factor-contribution bars** (explainability).
+  - **Assistant** — chat panel (RAG) with follow-ups + cited sources.
+  - **Data** — raw tickets/orders/subscriptions tables.
+- Components: `SummaryCard`, `Timeline`, `RiskBars`, `ChatPanel`, `CustomerHeader` on
+  shadcn/ui; charts via a lightweight React chart lib. AI tabs call FastAPI; simple data
+  reads go through Supabase.
+
+---
+
+## Build Phases (ordered, executable)
+
+1. **Supabase project + scaffold** — create hosted Supabase project; init `supabase/` (CLI),
+   repo layout, `.env.example`, `docker-compose.yml` (frontend, backend, ollama, neo4j,
+   redis). Pull `qwen3:8b` + `bge-m3` in Ollama.
+2. **Schema migrations** — SQL migrations for all 34 tables + `vector` extension + pgvector
+   column/index + baseline RLS policies; apply via `supabase db push`.
+3. **Seed** — synthetic generator → Supabase (service role) + matching Auth users; verify
+   counts + referential integrity.
+4. **LLM plumbing** — LiteLLM router + prompts; smoke-test Ollama completion + HF fallback.
+5. **Summary (core #1)** — facts assembler + template + generator + `/summary` API + UI card.
+6. **RAG chat (core #2)** — embed Doc_Chunk → pgvector; LlamaIndex chat engine; `/chat` API +
+   ChatPanel; persist conversations; follow-ups working.
+7. **Risk + explainability (core #3)** — scoring service + `Risk_Factor` breakdown +
+   `/risk` API + RiskBars UI + "why at risk?" wired into chat.
+8. **Timeline** — aggregator + `/timeline` API + Timeline UI; feed context into prompts.
+9. **Intent + model router** — wire classifier so queries route structured/RAG/reasoning.
+10. **Graph + multi-agent** — sync Neo4j; specialist agents + planner; graph query endpoint +
+    a "meeting brief" action in UI.
+11. **Auth + RBAC** — Supabase Auth in frontend, JWT verification + role guards in FastAPI,
+    RLS policies, audit logging.
+12. **Stubs + polish** — thin Alerts/Analytics/Admin endpoints over real tables; dashboard
+    polish, empty/error states, README.
+
+Cores (5–7) are the graded heart; ship them solid before 8–12.
+
+---
+
+## Verification
+
+- **Infra:** `supabase db push` applies cleanly; `docker compose up` → backend/frontend/
+  ollama/neo4j healthy; `GET /health` OK; Ollama serves `qwen3:8b` and `bge-m3`.
+- **Data:** seed runs clean; spot-check joins (customer→tickets/orders/subscription); at-risk
+  customers exist; Supabase Auth users created.
+- **Summary:** `POST /customers/{id}/summary` returns 4 sections + confidence + citations;
+  renders in UI; regeneration consistent.
+- **Chat:** ask _"Give me a summary of this customer"_ then _"Why is this customer at risk?"_
+  → grounded, cited answers; conversation persists across turns.
+- **Risk:** factor contributions sum coherently to the score; bars match the "why" narrative.
+- **Timeline:** events ordered correctly across sources.
+- **Router/fallback:** force a local timeout → confirm HF fallback triggers.
+- **Graph/agents:** _"who is complaining about Feature A?"_ returns via Cypher; "meeting
+  brief" runs all specialists.
+- **Auth/RLS:** unauthenticated request rejected; role without permission blocked; RLS blocks
+  cross-tenant reads; audit row written.
+- **E2E:** drive the real UI (login → pick an at-risk customer → summary, timeline, risk, chat).
+
+---
+
+## Deferred (explicitly out of scope for this PoC)
+
+- Real external connectors (CRM/Zendesk/HubSpot) — interface exists, implementations later.
+- Full Alerts engine (scheduled evaluation + real notification delivery) — schema + stub only.
+- Full Analytics/Reporting dashboards and export — schema + stub only.
+- Autonomous action workflows (refund/approval automation); Celery/Redis (only if inline jobs
+  get slow); Supabase Edge Functions (FastAPI covers AI orchestration).

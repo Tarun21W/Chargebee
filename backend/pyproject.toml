@@ -1,0 +1,47 @@
+[project]
+name = "customer-intelligence-agent"
+version = "0.1.0"
+description = "AI layer for the Customer Intelligence Agent (FastAPI)"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "python-dotenv>=1.0",
+
+    # Database (Supabase Postgres)
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.2",
+    "pgvector>=0.3",
+    "supabase>=2.6",
+
+    # LLM + RAG
+    "litellm>=1.44",
+    "llama-index-core>=0.11",
+    "llama-index-llms-litellm>=0.2",
+    "llama-index-embeddings-ollama>=0.3",
+    "llama-index-vector-stores-postgres>=0.2",
+
+    # Graph
+    "neo4j>=5.23",
+
+    # Auth
+    "pyjwt[crypto]>=2.9",
+
+    # Utils
+    "httpx>=0.27",
+    "tenacity>=8.5",
+    "python-dateutil>=2.9",
+]
+
+[project.optional-dependencies]
+jobs = ["celery>=5.4", "redis>=5.0"]
+dev = ["ruff>=0.6", "pytest>=8.3", "faker>=28.0"]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

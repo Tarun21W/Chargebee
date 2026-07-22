@@ -1,0 +1,14 @@
+# Supabase project configuration (used by the Supabase CLI for `db push`,
+# migrations, and local development). The hosted project is linked with:
+#   supabase link --project-ref YOUR-PROJECT-ref
+project_id = "customer-intelligence-agent"
+
+[db]
+major_version = 15
+
+[auth]
+enable_signup = true
+# Email/password is enough for the PoC seeded users.
+
+[storage]
+# Bucket for customer PDFs / transcripts.

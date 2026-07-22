@@ -1,0 +1,135 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Lora:wght@400;600&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── "Classical" editorial design system (from the Customer 360 prototype) ──
+   Warm off-white canvas, gold/bronze accent, serif type, hairline dividers.
+   Tokens are HSL triplets so Tailwind's hsl(var(--x)) utilities pick them up. */
+:root {
+  --background: 40 6% 95%;      /* #f3f2f2 */
+  --foreground: 40 6% 12%;      /* #201f1d ink */
+  --card: 36 24% 97%;           /* warm paper */
+  --muted: 40 6% 91%;           /* #eae7e7 */
+  --muted-foreground: 40 5% 42%;
+  --border: 40 6% 82%;          /* divider */
+  --primary: 36 55% 46%;        /* #b68235 gold */
+  --primary-foreground: 40 30% 98%;
+  --accent: 36 100% 95%;        /* #fff3e4 cream */
+  --ring: 36 55% 46%;
+  --sidebar: 40 8% 96%;
+  --sidebar-foreground: 40 6% 12%;
+  --sidebar-muted: 40 5% 45%;
+
+  --font-heading: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Lora", Georgia, serif;
+}
+
+* {
+  border-color: hsl(var(--border));
+  box-sizing: border-box;
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.14;
+}
+
+/* Uppercase kicker (section eyebrow) */
+.kicker {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: hsl(var(--primary));
+  font-family: var(--font-body);
+}
+
+/* Sidebar nav link */
+.navlink {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 12px;
+  border-radius: 4px;
+  color: hsl(var(--foreground) / 0.62);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.navlink:hover {
+  background: hsl(var(--foreground) / 0.06);
+  color: hsl(var(--foreground));
+}
+.navlink[data-active="true"] {
+  color: hsl(var(--primary));
+  background: hsl(var(--accent));
+}
+
+/* Underlined tab button */
+.tabbtn {
+  position: relative;
+  padding: 12px 2px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 15px;
+  color: hsl(var(--foreground) / 0.55);
+  transition: color 0.15s;
+}
+.tabbtn:hover { color: hsl(var(--foreground)); }
+.tabbtn[data-active="true"] { color: hsl(var(--foreground)); }
+.tabbtn[data-active="true"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: hsl(var(--primary));
+}
+
+/* Pill chip (filters / suggestions) */
+.chip {
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid hsl(var(--border));
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: hsl(var(--foreground));
+  transition: border-color 0.15s, background 0.15s;
+}
+.chip:hover { border-color: hsl(var(--primary)); background: hsl(var(--accent)); }
+.chip[data-active="true"] {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--accent));
+  color: hsl(var(--primary));
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+.skeleton { position: relative; overflow: hidden; background: hsl(var(--muted)); border-radius: 4px; }
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.06), transparent);
+  animation: shimmer 1.4s infinite;
+}
