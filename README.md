@@ -1,10 +1,9 @@
 <div align="center">
 
-<img src="docs/banner.svg" alt="Customer Intelligence Agent" width="100%"/>
+<img src="docs/banner.svg" alt="Pulse — Customer Intelligence Agent" width="100%"/>
 
 <br/>
 
-<!-- badges -->
 ![Next.js](https://img.shields.io/badge/Next.js-14-000000?logo=nextdotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)
@@ -15,153 +14,125 @@
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-b68235)
 
-<h3><em>Turn scattered CRM, ticket, billing &amp; usage data into decisions.</em></h3>
-
-<p>Ask <b>"Give me a summary of this customer"</b> or <b>"Why is this customer at risk?"</b> — and get a grounded, explainable answer with citations.</p>
-
 </div>
 
 ---
 
-## ✨ What it does
+## 📌 Project Title
 
-A **Customer 360** assistant for customer-facing teams. Pick a customer and instantly get:
+**Pulse — Customer Intelligence Agent**
 
-| | Capability | Powered by |
-|:--:|---|---|
-| 📝 | **AI Summary** — Activity · Issues · Insights · Recommendations, with confidence + citations | Local LLM + RAG |
-| 💬 | **Conversational assistant** — follow-ups, citations, intent-routed | RAG over pgvector |
-| ⚠️ | **Explainable risk** — health/churn score with **SHAP-style** factor bars ("why") | Transparent weighted model |
-| 🕒 | **Customer 360 timeline** — unified chronological event feed | Cross-table aggregation |
-| 🧑‍💼 | **Multi-agent meeting brief** — Support · Sales · Finance specialists → Planner | LLM agents |
-| 🕸️ | **Memory-graph search** — *"who is complaining about the API?"* | Neo4j (Cypher) |
-| 📊 | **Analytics** — segment/lifecycle charts, top at-risk by MRR | Cached aggregates + Recharts |
-| 🔔 | **Alerts** — churn-risk inbox + one-click evaluation | Scoring engine |
-| 🔐 | **Auth + RBAC + audit** — Supabase Auth (ES256/JWKS), RLS, roles/permissions | Supabase + FastAPI |
-| ⌘ | **Command bar (⌘K)** + dark-free **editorial UI** | Next.js |
+An AI assistant that turns scattered CRM, ticket, billing and usage data into decisions.
+Ask *"Give me a summary of this customer"* or *"Why is this customer at risk?"* and get a
+grounded, explainable answer with citations — plus a full **Customer 360**: AI summary,
+explainable risk, chronological timeline, RAG chat, multi-agent briefs and a memory-graph.
 
 ---
 
-## 🏗️ Architecture
+## 👥 Team Members
 
-```mermaid
-flowchart LR
-    subgraph Browser
-      UI["Next.js 14 · App Router · SWR<br/>Classical editorial UI · ⌘K"]
-    end
-    subgraph Supabase["Supabase Cloud"]
-      PG[("Postgres · 34 tables<br/>pgvector · RLS")]
-      AUTH["Auth · JWKS (ES256)"]
-    end
-    subgraph AI["FastAPI · AI layer"]
-      RT["Intent router"]
-      SVC["facts · summary · rag<br/>scoring · timeline · agents"]
-      CACHE["in-memory TTL cache"]
-    end
-    OLL["Ollama<br/>qwen2.5:3b · bge-m3"]
-    HF["Hugging Face<br/>(fallback)"]
-    NEO[("Neo4j<br/>memory graph")]
-
-    UI -->|"Supabase JS"| AUTH
-    UI -->|"same-origin /api proxy · Bearer JWT"| RT
-    RT --> SVC --> CACHE
-    SVC -->|"session pooler (IPv4)"| PG
-    SVC --> OLL
-    OLL -.->|timeout / error| HF
-    SVC --> NEO
-    AUTH -. JWKS verify .-> AI
-```
-
-**Runtime split:** Supabase owns data / auth / storage / vectors; FastAPI owns all AI work. The browser talks to the backend **same-origin** through a Next.js rewrite proxy (one warm keep-alive connection), which reaches FastAPI over the fast Docker network.
+- **Tarun J**
+- **Subhasri K**
+- **Satish Kumar**
 
 ---
 
-## 🔁 Example flow — *"Why is this customer at risk?"*
+## 🎯 Problem Statement
 
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant FE as Next.js
-    participant API as FastAPI
-    participant DB as Supabase
-    participant V as pgvector
-    participant LLM as Ollama
+Customer-facing teams (Support, Sales, Customer Success) waste time stitching together a
+customer's story from many disconnected systems before they can act. Pulse solves this by
+generating a **summarized, explainable view of any customer** — activity patterns, issues
+and complaints, key insights, and churn risk — from structured data + LLMs, and lets users
+**ask natural-language follow-ups** with conversational memory and cited evidence.
 
-    U->>FE: "Why is this customer at risk?"
-    FE->>API: POST /chat/{id} (Bearer JWT)
-    API->>API: verify JWT (JWKS, cached) · route intent = reasoning
-    API->>DB: facts (subscription, tickets, activity) — cached 60s
-    API->>API: compute risk → weighted factors (+ contributions)
-    API->>V: BGE-M3 embed query → cosine search (customer-scoped)
-    V-->>API: top ticket/note chunks
-    API->>LLM: facts + risk factors + context → answer
-    LLM-->>API: grounded answer + citations
-    API-->>FE: answer, factors, sources
-    FE-->>U: explanation with "why" + cited evidence
-```
+**What it delivers**
+- Accept a query like *"Give me a summary of this customer."*
+- Produce a concise summary: **activity patterns · issues/complaints · key insights · recommendations.**
+- Present it clearly, with confidence and source citations.
+- Bonus (implemented): follow-up Q&A (*"Why is this customer at risk?"*), explainable risk
+  scoring, a 360 timeline, multi-agent meeting briefs, and a relationship **memory graph**.
 
 ---
 
-## 🧰 Tech stack
+## 🧰 Technologies Used
 
 | Layer | Technology |
 |---|---|
-| **Frontend** | Next.js 14 (App Router), TypeScript, Tailwind, SWR, Recharts, lucide-react |
-| **Design** | "Classical" editorial system — Cormorant Garamond + Lora, warm palette, gold accent |
-| **Auth** | Supabase Auth — asymmetric **ES256** JWT, verified via JWKS (HS256 fallback) |
-| **Database** | Supabase **PostgreSQL 17** — single source of truth, 34 tables, RLS |
-| **Vectors** | **pgvector** (1024-dim, cosine) in Supabase |
-| **Backend** | **FastAPI** (Python 3.11), SQLAlchemy 2.0 |
-| **LLM runtime** | **Ollama** — `qwen2.5:3b` (chat) · `bge-m3` (embeddings) |
-| **Routing / fallback** | **LiteLLM** → Hugging Face Inference on local timeout/error |
-| **Graph** | **Neo4j 5** (memory graph) |
-| **Perf** | in-memory TTL cache · 58 DB indexes · SWR client cache · same-origin API proxy |
-| **Deploy** | **Docker Compose** |
+| **Frontend** | Next.js 14 (App Router), TypeScript, Tailwind CSS, SWR, Recharts, lucide-react |
+| **Design system** | "Classical" editorial — Cormorant Garamond + Lora, warm palette, gold accent |
+| **Authentication** | Supabase Auth (asymmetric **ES256** JWT, verified via JWKS) + RLS + audit logs |
+| **Database** | Supabase **PostgreSQL 17** — single source of truth, 34 tables |
+| **Vector search** | **pgvector** (1024-dim, cosine) inside Supabase |
+| **Backend / AI** | **FastAPI** (Python 3.11), SQLAlchemy 2.0 |
+| **LLM runtime** | **Ollama** — `qwen2.5:3b` (generation) · `bge-m3` (embeddings) |
+| **Model routing** | **LiteLLM** → Hugging Face Inference fallback on local timeout/error |
+| **Graph database** | **Neo4j 5** (customer memory graph) |
+| **Performance** | in-memory TTL cache · DB indexes · SWR client cache · same-origin API proxy |
+| **Deployment** | **Docker Compose** |
+
+**Model notes** — chosen for a fully local, offline demo that still reasons well:
+
+| Model | Role | Params | Context |
+|---|---|:--:|:--:|
+| Qwen2.5-3B-Instruct | summaries · chat · agents | 3.1B | 32K |
+| BGE-M3 | embeddings (RAG) | 568M | 8192 |
+| Qwen2.5-7B-Instruct | cloud fallback (HF) | 7.6B | 128K |
 
 ---
 
-## 📈 Model benchmarks
+## 🗂️ Folder Structure
 
-Models chosen for a **fully local, offline** demo that still reasons well.
-
-| Model | Role | Params | Context | Notes |
-|---|---|:--:|:--:|---|
-| **Qwen2.5-3B-Instruct** | summaries · chat · agents | 3.1B | 32K | strong quality/latency balance on CPU |
-| **BGE-M3** | embeddings (RAG) | 568M | 8192 | multilingual, 1024-dim, hybrid retrieval |
-| **Qwen2.5-7B-Instruct** | cloud fallback (HF) | 7.6B | 128K | only on local timeout/error |
-
-**Measured operation latency** — local, **CPU-only**, Supabase in `ap-northeast-1` *(indicative)*:
-
-| Operation | Latency | Bound by |
-|---|:--:|---|
-| Data API (customers / analytics), warm cache | **~0.3–0.6 s** | network to Supabase (Tokyo) |
-| Risk scoring (health/churn + factors) | **< 50 ms** | pure Python |
-| Timeline (cached) | **~40 ms** | in-memory cache |
-| RAG chat answer | **~15–35 s** | CPU LLM generation |
-| AI summary (4 sections) | **~20–40 s** | CPU LLM generation |
-| Multi-agent brief (4 LLM calls) | **~60–120 s** | CPU LLM generation |
-
-> 💡 LLM latency is CPU-bound. On a GPU (or via the HF fallback) these drop by 5–20×. Data APIs are cached and the browser uses one warm keep-alive connection to avoid Docker Desktop's per-connection overhead on Windows.
+```
+CB-PROJ/
+├─ docker-compose.yml          # frontend · backend · ollama · neo4j
+├─ .env.example                # environment template (copy to .env)
+├─ README.md · DESIGN.md · LICENSE
+├─ docs/
+│  └─ banner.svg               # animated README banner
+├─ supabase/
+│  ├─ config.toml
+│  └─ migrations/              # 34 tables · pgvector · RLS · performance indexes
+├─ backend/                    # FastAPI AI service
+│  ├─ Dockerfile · pyproject.toml
+│  └─ app/
+│     ├─ main.py               # app entry + router mounts
+│     ├─ core/                 # config · db · security(JWKS) · cache · audit
+│     ├─ models/               # SQLAlchemy models (7 modules)
+│     ├─ schemas/              # Pydantic request/response
+│     ├─ services/             # facts · llm · rag · summary · scoring · timeline · graph · agents
+│     ├─ api/routers/          # customers · summary · chat · risk · timeline · agents · graph · alerts · analytics · admin · ingest
+│     └─ seed/                 # synthetic data generator
+└─ frontend/                   # Next.js app
+   ├─ Dockerfile · next.config.mjs · tailwind.config.ts
+   └─ src/
+      ├─ app/(app)/            # dashboard · customers/[id] · analytics · alerts · admin
+      ├─ app/login/            # Supabase auth
+      ├─ components/           # Sidebar · Topbar · CommandBar · 360 tabs · charts
+      └─ lib/                  # SWR hooks · api client · supabase
+```
 
 ---
 
-## 🚀 Quick start
+## 🚀 How to Run
 
-**Prerequisites:** Docker Desktop, a hosted Supabase project, ~4 GB disk for models.
+**Prerequisites:** Docker Desktop, a hosted Supabase project, ~4 GB disk for the models.
 
 ```bash
-# 1. Configure
-cp .env.example .env         # fill Supabase keys + SESSION-POOLER DATABASE_URL
+# 1. Configure environment
+cp .env.example .env
+#    Fill in Supabase keys + the SESSION-POOLER DATABASE_URL (IPv4, +psycopg driver,
+#    URL-encode special chars in the password).
 
-# 2. Apply the schema (Supabase SQL editor: paste supabase/all_migrations.sql,
-#    or use the Supabase CLI: supabase db push)
+# 2. Apply the database schema
+#    Supabase SQL editor: paste supabase/all_migrations.sql
+#    (or: supabase db push)
 
-# 3. Start everything
+# 3. Start all services
 docker compose up -d --build
 docker compose exec ollama ollama pull qwen2.5:3b
 docker compose exec ollama ollama pull bge-m3
 
-# 4. Seed synthetic data (25 customers, tickets, orders, embeddings, graph, auth users)
+# 4. Seed synthetic data (customers, tickets, orders, embeddings, graph, auth users)
 docker compose exec backend python -m app.seed.run
 ```
 
@@ -171,45 +142,64 @@ docker compose exec backend python -m app.seed.run
 | **API docs** | http://localhost:8000/docs | — |
 | **Neo4j** | http://localhost:7474 | `neo4j` / *(your NEO4J_PASSWORD)* |
 
-> ⚠️ Supabase's *direct* DB host is IPv6-only; Docker containers on Windows can't reach it. Use the **Session Pooler** connection string (IPv4) in `DATABASE_URL`, with the `postgresql+psycopg://` driver and a URL-encoded password.
+> ⚠️ Supabase's *direct* DB host is IPv6-only and unreachable from Docker on Windows.
+> Use the **Session Pooler** connection string (IPv4) in `DATABASE_URL`.
 
----
+### Architecture
 
-## 🗂️ Project structure
-
+```mermaid
+flowchart LR
+    UI["Next.js · SWR · ⌘K"]
+    subgraph Supabase["Supabase Cloud"]
+      PG[("Postgres · 34 tables<br/>pgvector · RLS")]
+      AUTH["Auth · JWKS (ES256)"]
+    end
+    subgraph AI["FastAPI · AI layer"]
+      RT["Intent router"] --> SVC["facts · summary · rag<br/>scoring · timeline · agents"]
+    end
+    OLL["Ollama<br/>qwen2.5:3b · bge-m3"]
+    HF["Hugging Face (fallback)"]
+    NEO[("Neo4j<br/>memory graph")]
+    UI -->|Supabase JS| AUTH
+    UI -->|same-origin proxy · Bearer JWT| RT
+    SVC -->|session pooler| PG
+    SVC --> OLL
+    OLL -.->|timeout| HF
+    SVC --> NEO
 ```
-CB-PROJ/
-├─ docker-compose.yml          # frontend · backend · ollama · neo4j
-├─ supabase/migrations/        # 34 tables · pgvector · RLS · perf indexes
-├─ backend/app/
-│  ├─ models/                  # SQLAlchemy (7 modules)
-│  ├─ services/                # facts · llm · rag · summary · scoring · timeline · graph · agents
-│  ├─ api/routers/             # customers · summary · chat · risk · timeline · agents · graph · alerts · analytics · admin
-│  └─ seed/                    # synthetic data generator
-└─ frontend/src/
-   ├─ app/(app)/               # dashboard · customers/[id] · analytics · alerts · admin
-   ├─ components/              # Sidebar · Topbar · CommandBar · 360 tabs · charts
-   └─ lib/                     # SWR hooks · api client · supabase
-```
-
-See **[DESIGN.md](DESIGN.md)** for the full spec and the feature → endpoint traceability matrix.
 
 ---
 
-## 🎨 Design system
+## 📊 Current Progress
 
-The UI follows a **"Classical" editorial** language: warm off-white canvas, gold/bronze accent,
-Cormorant Garamond headings + Lora body, hairline dividers, pill chips and underlined tabs —
-a calm, print-inspired look that keeps dense customer data readable.
+**Status: complete PoC — running end-to-end and deployed.**
+
+| Capability | Status |
+|---|:--:|
+| Data model (34 tables, pgvector, RLS) + synthetic seed | ✅ |
+| AI Summary (activity · issues · insights · recommendations) | ✅ |
+| Conversational RAG assistant (citations, intent routing) | ✅ |
+| Explainable risk (health/churn + SHAP-style factors) | ✅ |
+| Customer 360 timeline | ✅ |
+| Multi-agent meeting brief (support · sales · finance + planner) | ✅ |
+| Memory-graph search (Neo4j) | ✅ |
+| Analytics · Alerts · Admin/RBAC pages | ✅ |
+| Auth (Supabase ES256/JWKS) + RLS + audit | ✅ |
+| "Classical" editorial UI + ⌘K command bar | ✅ |
+| Performance: caching · indexes · same-origin proxy | ✅ |
+
+**Indicative latency** (local, CPU-only): data APIs ~0.3–0.6 s · risk < 50 ms · timeline ~40 ms ·
+RAG chat / summary ~20–40 s (CPU LLM-bound) · multi-agent brief ~1–2 min.
 
 ---
 
-## 🛣️ Roadmap
+## 🔮 Future Work
 
-- Live connectors (CRM / Zendesk / Stripe) behind the ingestion interface
-- Autonomous action workflows (refund / approval / escalation)
-- Scheduled alert delivery + notification channels
-- Report generation & export
-- GPU inference profile + streaming responses
+- **Live data connectors** — CRM / Zendesk / Stripe behind the ingestion interface (replacing synthetic seed).
+- **Autonomous action workflows** — refund / approval / escalation with human-in-the-loop.
+- **Scheduled alerts + notification channels** — email / Slack / in-app delivery.
+- **Reporting** — report generation and export (PDF / CSV).
+- **GPU inference profile + streaming responses** — 5–20× faster LLM latency.
+- **Model upgrades** — Qwen2.5-7B/14B for higher-quality summaries and reasoning.
 
-<div align="center"><sub>Built as a Customer Intelligence PoC · MIT License</sub></div>
+<div align="center"><sub>Pulse — Customer Intelligence Agent · MIT License</sub></div>
