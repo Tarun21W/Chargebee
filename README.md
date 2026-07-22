@@ -172,24 +172,25 @@ flowchart LR
 
 ## 📊 Current Progress
 
-**Status: complete PoC — running end-to-end and deployed.**
+**Status: active development — core intelligence features working; hardening & testing in progress.**
 
-| Capability | Status |
+Legend: ✅ done · 🧪 verified · 🏗️ built · 🔸 pending
+
+| Item | Status |
 |---|:--:|
-| Data model (34 tables, pgvector, RLS) + synthetic seed | ✅ |
-| AI Summary (activity · issues · insights · recommendations) | ✅ |
-| Conversational RAG assistant (citations, intent routing) | ✅ |
-| Explainable risk (health/churn + SHAP-style factors) | ✅ |
-| Customer 360 timeline | ✅ |
-| Multi-agent meeting brief (support · sales · finance + planner) | ✅ |
-| Memory-graph search (Neo4j) | ✅ |
-| Analytics · Alerts · Admin/RBAC pages | ✅ |
-| Auth (Supabase ES256/JWKS) + RLS + audit | ✅ |
-| "Classical" editorial UI + ⌘K command bar | ✅ |
-| Performance: caching · indexes · same-origin proxy | ✅ |
-
-**Indicative latency** (local, CPU-only): data APIs ~0.3–0.6 s · risk < 50 ms · timeline ~40 ms ·
-RAG chat / summary ~20–40 s (CPU LLM-bound) · multi-agent brief ~1–2 min.
+| Data model — 34 tables, pgvector, row-level security on Supabase | ✅ Live |
+| Synthetic seed — 25 customers, tickets/orders/subscriptions, 69 embedded docs, Neo4j graph, auth users | ✅ Seeded |
+| AI Summary — four sections, confidence score, citations | 🧪 Verified |
+| Conversational RAG chat — citations, intent routing, follow-ups | 🧪 Verified |
+| Explainable risk — health/churn score with SHAP-style factors | 🧪 Verified |
+| Customer 360 timeline | 🧪 Verified |
+| Memory-graph search over Neo4j | 🧪 Verified |
+| Analytics, Alerts, and Admin/RBAC pages | 🏗️ Built |
+| Multi-agent meeting brief (support · sales · finance + planner) | 🔸 Pending |
+| Auth (Supabase ES256 via JWKS) with RLS + audit logging | 🔸 Pending |
+| Security testing (OWASP ZAP) | 🔸 Pending |
+| Playwright + manual testing | 🔸 Pending |
+| LLM optimisation + test benchmarks | 🔸 Pending |
 
 ---
 
