@@ -138,7 +138,7 @@ docker compose exec backend python -m app.seed.run
 
 | Surface | URL | Credentials |
 |---|---|---|
-| **App** | http://localhost:3000 | `ava@calispec.ai` / `Passw0rd!demo` |
+| **App** | http://localhost:3000 | `tarunj0305@gmail.com` / `blahblah@123` |
 | **API docs** | http://localhost:8000/docs | — |
 | **Neo4j** | http://localhost:7474 | `neo4j` / *(your NEO4J_PASSWORD)* |
 
