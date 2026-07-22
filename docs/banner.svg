@@ -23,7 +23,7 @@
   </g>
 
   <!-- kicker -->
-  <text x="70" y="96" fill="#a06f24" font-size="15" letter-spacing="4" font-family="Georgia, serif">C A L I S P E C  ·  A I</text>
+  <text x="70" y="96" fill="#a06f24" font-size="15" letter-spacing="6" font-family="Georgia, serif">P U L S E</text>
 
   <!-- title -->
   <text x="68" y="168" fill="#201f1d" font-size="62" font-weight="600" letter-spacing="-1">Customer Intelligence Agent</text>
