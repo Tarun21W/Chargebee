@@ -64,8 +64,9 @@ and complaints, key insights, and churn risk — from structured data + LLMs, an
 | **Database** | Supabase **PostgreSQL 17** — single source of truth, 34 tables |
 | **Vector search** | **pgvector** (1024-dim, cosine) inside Supabase |
 | **Backend / AI** | **FastAPI** (Python 3.11), SQLAlchemy 2.0 |
-| **LLM runtime** | **Ollama** — `qwen2.5:3b` (generation) · `bge-m3` (embeddings) |
-| **Model routing** | **LiteLLM** → Hugging Face Inference fallback on local timeout/error |
+| **LLM (primary)** | **Hugging Face Inference** — `Qwen2.5-72B-Instruct` |
+| **LLM (fallback)** | **Ollama** — `qwen2.5:3b` (offline / on HF failure) · `bge-m3` embeddings |
+| **Model routing** | **LiteLLM** — HF primary → local Ollama fallback |
 | **Graph database** | **Neo4j 5** (customer memory graph) |
 | **Performance** | in-memory TTL cache · DB indexes · SWR client cache · same-origin API proxy |
 | **Deployment** | **Docker Compose** |
@@ -74,9 +75,9 @@ and complaints, key insights, and churn risk — from structured data + LLMs, an
 
 | Model | Role | Params | Context |
 |---|---|:--:|:--:|
-| Qwen2.5-3B-Instruct | summaries · chat · agents | 3.1B | 32K |
+| Qwen2.5-72B-Instruct (HF) | **primary** — summaries · chat · agents | 72B | 128K |
+| Qwen2.5-3B-Instruct (Ollama) | fallback — offline / on HF failure | 3.1B | 32K |
 | BGE-M3 | embeddings (RAG) | 568M | 8192 |
-| Qwen2.5-7B-Instruct | cloud fallback (HF) | 7.6B | 128K |
 
 ---
 

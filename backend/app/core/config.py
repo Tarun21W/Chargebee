@@ -25,9 +25,10 @@ class Settings(BaseSettings):
     embed_model: str = "bge-m3"
     embed_dim: int = 1024
 
-    # Hugging Face fallback
+    # Hugging Face — PRIMARY provider (large model); Ollama is the fallback.
     hf_token: str = ""
-    hf_fallback_model: str = "Qwen/Qwen2.5-7B-Instruct"
+    hf_primary_model: str = "Qwen/Qwen2.5-72B-Instruct"
+    hf_fallback_model: str = "Qwen/Qwen2.5-72B-Instruct"  # kept for back-compat
 
     # Neo4j
     neo4j_uri: str = "bolt://localhost:7687"
