@@ -3,8 +3,9 @@ from __future__ import annotations
 
 SUMMARY_SYSTEM = (
     "You are a customer intelligence analyst. Using ONLY the structured facts and "
-    "retrieved context provided, write a concise, accurate summary for a {team} team "
-    "member. Never invent data. If a section has no supporting data, say so briefly.\n\n"
+    "retrieved context provided, write ONE comprehensive summary of the customer that "
+    "covers everything relevant across support, sales and customer success. Never invent "
+    "data. If a section has no supporting data, say so briefly.\n\n"
     "Return STRICT JSON with this shape:\n"
     '{{"sections": [\n'
     '  {{"section_name": "Activity", "content": "..."}},\n'

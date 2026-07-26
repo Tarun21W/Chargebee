@@ -7,11 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { CustomerSummary } from "@/lib/types";
 
-const TEAMS = ["CustomerSuccess", "Support", "Sales"] as const;
-
 export function SummaryTab({ customerId }: { customerId: string }) {
   const [summary, setSummary] = useState<CustomerSummary | null>(null);
-  const [team, setTeam] = useState<string>("CustomerSuccess");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,7 +18,7 @@ export function SummaryTab({ customerId }: { customerId: string }) {
     try {
       const res = await apiFetch<CustomerSummary>(`/customers/${customerId}/summary`, {
         method: "POST",
-        body: JSON.stringify({ team }),
+        body: JSON.stringify({}),
       });
       setSummary(res);
     } catch (e) {
@@ -34,17 +31,6 @@ export function SummaryTab({ customerId }: { customerId: string }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <select
-          value={team}
-          onChange={(e) => setTeam(e.target.value)}
-          className="h-9 rounded-md border border-border bg-background px-2 text-sm"
-        >
-          {TEAMS.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
         <Button onClick={generate} disabled={loading}>
           {loading ? "Generating…" : summary ? "Regenerate" : "Generate summary"}
         </Button>

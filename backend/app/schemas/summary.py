@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict
 
 
 class SummaryRequest(BaseModel):
-    team: str = "CustomerSuccess"
+    team: str = "Comprehensive"
 
 
 class SectionOut(BaseModel):
