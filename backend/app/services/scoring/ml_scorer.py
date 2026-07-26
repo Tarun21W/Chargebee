@@ -90,15 +90,17 @@ def compute_risk_ml(db: Session, customer_id: uuid.UUID, persist: bool = True) -
     ]
     factors.sort(key=lambda f: f["contribution"], reverse=True)
 
-    explanation = _explain(factors, level) + f"  (ML model · AUC {art.get('auc', 0):.2f})"
+    explanation = _explain(factors, level)
 
     if persist:
         _persist(db, customer_id, health, churn, level, factors)
 
+    kind_name = {"gb": "Gradient Boosting", "lr": "Logistic Regression"}.get(art["kind"], art["kind"])
     return {
         "health_score": health,
         "churn_score": churn,
         "risk_level": level,
         "factors": factors,
         "explanation": explanation,
+        "model": {"type": "ml", "name": kind_name, "auc": round(float(art.get("auc", 0)), 3)},
     }

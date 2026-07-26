@@ -69,6 +69,7 @@ export interface RiskResult {
   risk_level: string;
   factors: RiskFactor[];
   explanation: string;
+  model?: { type: string; name: string; auc: number | null };
 }
 
 export interface TimelineEvent {

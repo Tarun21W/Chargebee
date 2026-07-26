@@ -102,6 +102,7 @@ def compute_risk(db: Session, customer_id: uuid.UUID, persist: bool = True) -> d
         "risk_level": level,
         "factors": factors,
         "explanation": explanation,
+        "model": {"type": "formula", "name": "Weighted formula", "auc": None},
     }
 
 

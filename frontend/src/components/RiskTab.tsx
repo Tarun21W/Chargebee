@@ -62,7 +62,16 @@ export function RiskTab({ customerId }: { customerId: string }) {
 
       <Card className="lg:col-span-2">
         <CardHeader>
-          <CardTitle>Why? — contributing factors</CardTitle>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <CardTitle>Why? — contributing factors</CardTitle>
+            {risk.model && (
+              <Badge variant={risk.model.type === "ml" ? "default" : "muted"}>
+                {risk.model.type === "ml" ? "SHAP · " : ""}
+                {risk.model.name}
+                {risk.model.auc != null ? ` · AUC ${risk.model.auc.toFixed(2)}` : ""}
+              </Badge>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="space-y-2">
           {risk.factors.map((f) => {
