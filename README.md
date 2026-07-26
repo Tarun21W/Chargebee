@@ -183,7 +183,7 @@ Legend: ✅ done · 🧪 verified · 🏗️ built · 🔸 pending
 | Synthetic seed — 25 customers, tickets/orders/subscriptions, 69 embedded docs, Neo4j graph, auth users | ✅ Seeded |
 | AI Summary — four sections, confidence score, citations | 🧪 Verified |
 | Conversational RAG chat — citations, intent routing, follow-ups | 🧪 Verified |
-| Explainable risk — health/churn score with SHAP-style factors | 🧪 Verified |
+| Explainable risk — trained ML churn model (GB / logistic) + **SHAP** factor attribution | 🧪 Verified |
 | Customer 360 timeline | 🧪 Verified |
 | Memory-graph search over Neo4j | 🧪 Verified |
 | Analytics, Alerts, and Admin/RBAC pages | 🏗️ Built |

@@ -62,6 +62,18 @@ def _risk_level(churn: float) -> str:
 
 
 def compute_risk(db: Session, customer_id: uuid.UUID, persist: bool = True) -> dict:
+    # Prefer the trained ML model (SHAP-explained) when its artifact exists;
+    # fall back to the transparent weighted formula otherwise.
+    try:
+        from app.services.scoring import ml_scorer
+
+        if ml_scorer.available():
+            return ml_scorer.compute_risk_ml(db, customer_id, persist=persist)
+    except Exception as exc:  # noqa: BLE001 - never let ML failure break scoring
+        from app.core.logging import get_logger
+
+        get_logger("app.scoring").warning("ML scorer failed (%s); using formula.", exc)
+
     facts = build_facts(db, customer_id)
     feats = _features(facts)
 

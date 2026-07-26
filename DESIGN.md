@@ -143,8 +143,10 @@ locked to service role). SQLAlchemy models in `backend/app/models/` mirror this.
   customer → context + citations. Degrades to facts-only if embeddings absent.
 - **Summary** (`services/summary/`): team template + facts + timeline + retrieved docs →
   sectioned JSON → persisted with confidence + citations.
-- **Scoring** (`services/scoring/`): transparent weighted model → health/churn + per-factor
-  contributions (exact, additive → native explainability).
+- **Scoring** (`services/scoring/`): a trained **ML churn model** (gradient boosting /
+  logistic regression, `train.py`) → churn probability + health, explained per-feature with
+  **SHAP** (`ml_scorer.py`). Falls back to a transparent weighted formula (`scorer.py`) if the
+  model artifact is absent. Same additive factor breakdown drives the "why?" UI.
 - **Timeline** (`services/timeline/`): union of dated events across tables. Cached 60s.
 - **Intent router** (`services/agents/intent.py`): classifies query → structured / rag /
   reasoning / agent; picks model tier and context depth.
