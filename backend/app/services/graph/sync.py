@@ -141,3 +141,67 @@ def sync_all(db: Session) -> dict:
 
     log.info("Graph sync: %s", counts)
     return counts
+
+
+def sync_customer(db: Session, customer_id) -> None:
+    """Incrementally MERGE a single customer's nodes/edges (no full reset)."""
+    from app.services.graph import get_driver
+
+    c = db.scalar(
+        select(Customer)
+        .where(Customer.customer_id == customer_id)
+        .options(
+            selectinload(Customer.orders).selectinload(Order.items),
+            selectinload(Customer.tickets),
+            selectinload(Customer.interactions),
+            selectinload(Customer.subscriptions),
+        )
+    )
+    if c is None:
+        return
+    users = {str(u.user_id): u.user_name for u in db.scalars(select(User)).all()}
+    cid = str(c.customer_id)
+
+    with get_driver().session() as sess:
+        for stmt in _CONSTRAINTS:
+            sess.run(stmt)
+        sess.run(
+            "MERGE (c:Customer {id:$id}) SET c.name=$name, c.segment=$segment, "
+            "c.lifecycle=$lifecycle, c.region=$region",
+            id=cid, name=c.customer_name, segment=c.segment,
+            lifecycle=c.lifecycle_stage, region=c.region,
+        )
+        if c.owner_user_id and str(c.owner_user_id) in users:
+            sess.run(
+                "MERGE (u:User {id:$uid}) SET u.name=$uname WITH u "
+                "MATCH (c:Customer {id:$cid}) MERGE (c)-[:OWNED_BY]->(u)",
+                uid=str(c.owner_user_id), uname=users[str(c.owner_user_id)], cid=cid,
+            )
+        for pname in {i.product.product_name for o in c.orders for i in o.items if i.product}:
+            sess.run(
+                "MERGE (p:Product {name:$p}) WITH p MATCH (c:Customer {id:$cid}) "
+                "MERGE (c)-[:BOUGHT]->(p)", p=pname, cid=cid,
+            )
+        for t in c.tickets:
+            if t.sentiment is not None and float(t.sentiment) < -0.2:
+                sess.run(
+                    "MERGE (topic:Topic {name:$n}) WITH topic MATCH (c:Customer {id:$cid}) "
+                    "MERGE (c)-[r:COMPLAINED_ABOUT]->(topic) SET r.sentiment=$s",
+                    n=t.subject, cid=cid, s=float(t.sentiment),
+                )
+        for s in c.subscriptions:
+            sess.run(
+                "MERGE (pl:Plan {name:$plan}) WITH pl MATCH (c:Customer {id:$cid}) "
+                "MERGE (c)-[r:SUBSCRIBES_TO]->(pl) SET r.mrr=$mrr, r.status=$status",
+                plan=s.plan, cid=cid, mrr=float(s.mrr), status=s.status,
+            )
+    log.info("Graph: synced customer %s", cid)
+
+
+def delete_customer_from_graph(customer_id) -> None:
+    """Remove a customer node (and its relationships) from the graph."""
+    from app.services.graph import get_driver
+
+    with get_driver().session() as sess:
+        sess.run("MATCH (c:Customer {id:$id}) DETACH DELETE c", id=str(customer_id))
+    log.info("Graph: deleted customer %s", customer_id)
