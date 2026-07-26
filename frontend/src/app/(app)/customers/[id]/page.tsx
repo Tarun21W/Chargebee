@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useSWRConfig } from "swr";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
@@ -27,12 +28,14 @@ export default function CustomerPage() {
   const [tab, setTab] = useState<Tab>("Summary");
   const [deleting, setDeleting] = useState(false);
   const router = useRouter();
+  const { mutate } = useSWRConfig();
 
   async function onDelete() {
     if (!confirm(`Delete ${customer?.customer_name ?? "this customer"}? This removes all their data.`)) return;
     setDeleting(true);
     try {
       await apiFetch(`/customers/${id}`, { method: "DELETE" });
+      mutate((key) => typeof key === "string" && (key.startsWith("/customers") || key.startsWith("/analytics")));
       router.push("/");
     } catch (e) {
       alert(`Delete failed: ${String(e)}`);

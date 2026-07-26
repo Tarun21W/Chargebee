@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSWRConfig } from "swr";
 import { Plus, X } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ const SUB_STATUS = ["active", "past_due", "cancelled"];
 
 export function NewCustomerDialog() {
   const router = useRouter();
+  const { mutate } = useSWRConfig();
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +60,8 @@ export function NewCustomerDialog() {
         method: "POST",
         body: JSON.stringify(payload),
       });
+      // Revalidate the customer list + analytics overview so they reflect the new customer.
+      mutate((key) => typeof key === "string" && (key.startsWith("/customers") || key.startsWith("/analytics")));
       setOpen(false);
       router.push(`/customers/${res.customer_id}`);
     } catch (err) {
