@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     neo4j_password: str = "please-change-me"
 
     # Behaviour
-    llm_request_timeout: int = 60
+    llm_request_timeout: int = 150
     cors_origins: str = "http://localhost:3000"
     log_level: str = "INFO"
 
