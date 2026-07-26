@@ -4,6 +4,7 @@
 
 <br/>
 
+[![CI](https://github.com/Tarun21W/Chargebee/actions/workflows/ci.yml/badge.svg)](https://github.com/Tarun21W/Chargebee/actions/workflows/ci.yml)
 ![Next.js](https://img.shields.io/badge/Next.js-14-000000?logo=nextdotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)
