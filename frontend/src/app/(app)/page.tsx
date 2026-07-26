@@ -7,6 +7,7 @@ import { Badge, riskVariant } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatCard } from "@/components/StatCard";
 import { NewCustomerDialog } from "@/components/NewCustomerDialog";
+import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
 import { useCustomers, useOverview } from "@/lib/hooks";
 
 const LIFECYCLES = ["", "At-Risk", "Active", "Onboarding"];
@@ -31,18 +32,18 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI row */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <Stagger className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {overview ? (
           <>
-            <StatCard label="Total MRR" value={`$${overview.total_mrr.toLocaleString()}`} sub="across active plans" />
-            <StatCard label="At-risk" value={overview.at_risk_count} accent="risk" sub="need attention" />
-            <StatCard label="Past due" value={overview.past_due_count} accent="risk" sub="billing" />
-            <StatCard label="Open tickets" value={overview.open_tickets} sub="unresolved" />
+            <StaggerItem><StatCard label="Total MRR" value={`$${overview.total_mrr.toLocaleString()}`} sub="across active plans" /></StaggerItem>
+            <StaggerItem><StatCard label="At-risk" value={overview.at_risk_count} accent="risk" sub="need attention" /></StaggerItem>
+            <StaggerItem><StatCard label="Past due" value={overview.past_due_count} accent="risk" sub="billing" /></StaggerItem>
+            <StaggerItem><StatCard label="Open tickets" value={overview.open_tickets} sub="unresolved" /></StaggerItem>
           </>
         ) : (
           Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[92px]" />)
         )}
-      </div>
+      </Stagger>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2">
@@ -73,11 +74,12 @@ export default function DashboardPage() {
       )}
 
       {/* Customer grid */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <Stagger className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {isLoading
           ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-[86px]" />)
           : customers.map((c) => (
-              <Link key={c.customer_id} href={`/customers/${c.customer_id}`}>
+              <StaggerItem key={c.customer_id} className="h-full">
+              <Link href={`/customers/${c.customer_id}`}>
                 <Card className="h-full transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-md">
                   <CardContent className="space-y-2 pt-4">
                     <div className="flex items-center justify-between gap-2">
@@ -95,8 +97,9 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
               </Link>
+              </StaggerItem>
             ))}
-      </div>
+      </Stagger>
       {!isLoading && customers.length === 0 && !error && (
         <p className="text-sm text-muted-foreground">No customers match.</p>
       )}
