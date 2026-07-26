@@ -20,15 +20,13 @@ class Settings(BaseSettings):
 
     # Ollama / LLM
     ollama_base_url: str = "http://localhost:11434"
-    llm_primary_model: str = "qwen3:8b"
-    llm_heavy_model: str = "gemma3:12b"
+    # Local-only models (Ollama). fast = small model for intent/classification;
+    # primary/heavy = the quality model for chat, summaries and agents.
+    llm_fast_model: str = "qwen2.5:3b"
+    llm_primary_model: str = "qwen2.5:7b"
+    llm_heavy_model: str = "qwen2.5:7b"
     embed_model: str = "bge-m3"
     embed_dim: int = 1024
-
-    # Hugging Face — PRIMARY provider (large model); Ollama is the fallback.
-    hf_token: str = ""
-    hf_primary_model: str = "Qwen/Qwen2.5-72B-Instruct"
-    hf_fallback_model: str = "Qwen/Qwen2.5-72B-Instruct"  # kept for back-compat
 
     # Neo4j
     neo4j_uri: str = "bolt://localhost:7687"

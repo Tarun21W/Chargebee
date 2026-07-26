@@ -64,19 +64,18 @@ and complaints, key insights, and churn risk — from structured data + LLMs, an
 | **Database** | Supabase **PostgreSQL 17** — single source of truth, 26 tables |
 | **Vector search** | **pgvector** (1024-dim, cosine) inside Supabase |
 | **Backend / AI** | **FastAPI** (Python 3.11), SQLAlchemy 2.0 |
-| **LLM (primary)** | **Hugging Face Inference** — `Qwen2.5-72B-Instruct` |
-| **LLM (fallback)** | **Ollama** — `qwen2.5:3b` (offline / on HF failure) · `bge-m3` embeddings |
-| **Model routing** | **LiteLLM** — HF primary → local Ollama fallback |
+| **LLM (local)** | **Ollama** — `qwen2.5:7b` (chat/summaries/agents) · `qwen2.5:3b` (fast intent) · `bge-m3` embeddings |
+| **Model routing** | **LiteLLM** — local Ollama only, fully offline (no cloud) |
 | **Graph database** | **Neo4j 5** (customer memory graph) |
 | **Performance** | in-memory TTL cache · DB indexes · SWR client cache · same-origin API proxy |
 | **Deployment** | **Docker Compose** |
 
-**Model notes** — chosen for a fully local, offline demo that still reasons well:
+**Model notes** — fully local (Ollama), sized for a 16GB laptop, no cloud:
 
 | Model | Role | Params | Context |
 |---|---|:--:|:--:|
-| Qwen2.5-72B-Instruct (HF) | **primary** — summaries · chat · agents | 72B | 128K |
-| Qwen2.5-3B-Instruct (Ollama) | fallback — offline / on HF failure | 3.1B | 32K |
+| Qwen2.5-7B-Instruct | summaries · chat · agents (quality) | 7.6B | 128K |
+| Qwen2.5-3B-Instruct | intent classification (fast) | 3.1B | 32K |
 | BGE-M3 | embeddings (RAG) | 568M | 8192 |
 
 ---
@@ -130,6 +129,7 @@ cp .env.example .env
 
 # 3. Start all services
 docker compose up -d --build
+docker compose exec ollama ollama pull qwen2.5:7b
 docker compose exec ollama ollama pull qwen2.5:3b
 docker compose exec ollama ollama pull bge-m3
 

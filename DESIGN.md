@@ -53,7 +53,7 @@ the Supabase **session pooler** (IPv4) so containers can reach it.
 | Auth | Supabase Auth (asymmetric **ES256**, verified server-side via JWKS; HS256 fallback) |
 | DB / Vector / Storage | Supabase Postgres 17 + pgvector + Storage |
 | AI service | FastAPI (Python 3.11), SQLAlchemy 2.0 |
-| LLM runtime | Ollama — `qwen2.5:3b` (chat + heavy), `bge-m3` (embeddings, 1024-dim); Hugging Face Inference fallback via LiteLLM |
+| LLM runtime | Ollama (local, no cloud) — `qwen2.5:7b` (chat/summaries/agents), `qwen2.5:3b` (fast intent), `bge-m3` (embeddings, 1024-dim) via LiteLLM |
 | RAG | LlamaIndex-style retrieval over pgvector (cosine) |
 | Graph | Neo4j 5 Community |
 | Perf | In-memory TTL cache (backend), composite indexes (DB), SWR (client) |
@@ -135,8 +135,8 @@ and reporting — were dropped; see `migrations/20260726120000_drop_unused_table
 
 - **Facts assembler** (`services/facts.py`): structured signals (subscription, tickets,
   sentiment, orders, activity) — shared by summary, chat, risk, agents. Cached 60s.
-- **LLM router** (`services/llm/router.py`): LiteLLM; local Ollama primary with tiers
-  (`fast`/`primary`/`heavy`) → Hugging Face fallback on timeout/error.
+- **LLM router** (`services/llm/router.py`): LiteLLM over local Ollama only (no cloud).
+  Tiers: `fast` (qwen2.5:3b intent) · `primary`/`heavy` (qwen2.5:7b chat/summaries/agents).
 - **RAG** (`services/rag/`): BGE-M3 query embedding → pgvector cosine search scoped to the
   customer → context + citations. Degrades to facts-only if embeddings absent.
 - **Summary** (`services/summary/`): team template + facts + timeline + retrieved docs →
