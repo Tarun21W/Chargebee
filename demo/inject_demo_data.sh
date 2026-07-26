@@ -14,7 +14,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 set -a; source "$ROOT/.env"; set +a
 
 BACKEND="${BACKEND_URL:-http://localhost:8000}"
-EMAIL="${DEMO_EMAIL:-ava@calispec.ai}"        # seeded admin (has all permissions)
+EMAIL="${DEMO_EMAIL:-admin@pulse.ai}"        # seeded admin (has all permissions)
 PASSWORD="${DEMO_PASSWORD:-Passw0rd!demo}"
 
 sb() {  # sb <table> <json>  -> inserts a row, echoes the representation JSON

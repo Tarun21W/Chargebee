@@ -12,11 +12,11 @@ from app.models.summary import SummaryTemplate
 
 # ---- Staff users (also become customer owners / ticket assignees) ----------
 STAFF = [
-    ("Ava Thompson", "ava@calispec.ai", "Admin"),
-    ("Marco Reyes", "marco@calispec.ai", "CSM"),
-    ("Priya Nair", "priya@calispec.ai", "CSM"),
-    ("Liam Chen", "liam@calispec.ai", "Sales"),
-    ("Sofia Rossi", "sofia@calispec.ai", "Support"),
+    ("Ava Thompson", "admin@pulse.ai", "Admin"),
+    ("Marco Reyes", "marco@pulse.ai", "CSM"),
+    ("Priya Nair", "priya@pulse.ai", "CSM"),
+    ("Liam Chen", "liam@pulse.ai", "Sales"),
+    ("Sofia Rossi", "sofia@pulse.ai", "Support"),
 ]
 
 ROLES = {

@@ -16,7 +16,7 @@ export function Sidebar() {
   return (
     <aside className="hidden w-[236px] shrink-0 flex-col border-r border-border bg-sidebar px-3 py-5 md:flex">
       <div className="mb-4 px-3">
-        <div className="kicker">Calispec</div>
+        <div className="kicker">Pulse.ai</div>
         <div className="font-heading text-xl leading-tight">Customer Intelligence</div>
       </div>
       <nav className="flex flex-col gap-[3px]">
