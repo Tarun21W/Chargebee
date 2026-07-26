@@ -24,6 +24,9 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [nu, setNu] = useState({ user_name: "", email: "", password: "Pulse@123", role: "CSM" });
 
+  // Only Admins may add/delete users (the API also enforces this).
+  const isAdmin = me?.permissions?.includes("admin.manage") ?? false;
+
   const refresh = () => mutate("/admin/users");
 
   async function addUser(e: React.FormEvent) {
@@ -74,9 +77,11 @@ export default function AdminPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Users ({users.length})</CardTitle>
-              <Button variant="ghost" onClick={() => setAdding((a) => !a)}>
-                <Plus className="h-4 w-4" /> Add
-              </Button>
+              {isAdmin && (
+                <Button variant="ghost" onClick={() => setAdding((a) => !a)}>
+                  <Plus className="h-4 w-4" /> Add
+                </Button>
+              )}
             </div>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -105,13 +110,15 @@ export default function AdminPage() {
                     <span className="w-28 truncate">{u.user_name}</span>
                     <span className="flex-1 truncate text-muted-foreground">{u.email}</span>
                     <Badge variant={u.is_active ? "low" : "muted"}>{u.is_active ? "active" : "inactive"}</Badge>
-                    <button
-                      onClick={() => removeUser(u.user_id, u.user_name)}
-                      className="text-muted-foreground hover:text-risk-high"
-                      title="Delete user"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    {isAdmin && (
+                      <button
+                        onClick={() => removeUser(u.user_id, u.user_name)}
+                        className="text-muted-foreground hover:text-risk-high"
+                        title="Delete user"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                 ))}
           </CardContent>
