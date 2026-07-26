@@ -61,7 +61,7 @@ and complaints, key insights, and churn risk — from structured data + LLMs, an
 | **Frontend** | Next.js 14 (App Router), TypeScript, Tailwind CSS, SWR, Recharts, lucide-react |
 | **Design system** | "Classical" editorial — Cormorant Garamond + Lora, warm palette, gold accent |
 | **Authentication** | Supabase Auth (asymmetric **ES256** JWT, verified via JWKS) + RLS + audit logs |
-| **Database** | Supabase **PostgreSQL 17** — single source of truth, 34 tables |
+| **Database** | Supabase **PostgreSQL 17** — single source of truth, 26 tables |
 | **Vector search** | **pgvector** (1024-dim, cosine) inside Supabase |
 | **Backend / AI** | **FastAPI** (Python 3.11), SQLAlchemy 2.0 |
 | **LLM (primary)** | **Hugging Face Inference** — `Qwen2.5-72B-Instruct` |
@@ -92,7 +92,7 @@ CB-PROJ/
 │  └─ banner.svg               # animated README banner
 ├─ supabase/
 │  ├─ config.toml
-│  └─ migrations/              # 34 tables · pgvector · RLS · performance indexes
+│  └─ migrations/              # 26 tables · pgvector · RLS · performance indexes
 ├─ backend/                    # FastAPI AI service
 │  ├─ Dockerfile · pyproject.toml
 │  └─ app/
@@ -152,7 +152,7 @@ docker compose exec backend python -m app.seed.run
 flowchart LR
     UI["Next.js · SWR · ⌘K"]
     subgraph Supabase["Supabase Cloud"]
-      PG[("Postgres · 34 tables<br/>pgvector · RLS")]
+      PG[("Postgres · 26 tables<br/>pgvector · RLS")]
       AUTH["Auth · JWKS (ES256)"]
     end
     subgraph AI["FastAPI · AI layer"]
@@ -179,7 +179,7 @@ Legend: ✅ done · 🧪 verified · 🏗️ built · 🔸 pending
 
 | Item | Status |
 |---|:--:|
-| Data model — 34 tables, pgvector, row-level security on Supabase | ✅ Live |
+| Data model — 26 tables, pgvector, row-level security on Supabase | ✅ Live |
 | Synthetic seed — 25 customers, tickets/orders/subscriptions, 69 embedded docs, Neo4j graph, auth users | ✅ Seeded |
 | AI Summary — four sections, confidence score, citations | 🧪 Verified |
 | Conversational RAG chat — citations, intent routing, follow-ups | 🧪 Verified |

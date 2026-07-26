@@ -42,36 +42,6 @@ class Customer(Base):
     subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="customer")
 
 
-class DataSource(Base):
-    __tablename__ = "data_sources"
-
-    source_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    source_name: Mapped[str] = mapped_column(String, nullable=False)
-    source_type: Mapped[str] = mapped_column(String, nullable=False)  # CRM / Billing / Ticketing / Usage
-    connection_status: Mapped[str] = mapped_column(String, default="disconnected")
-    last_sync_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-
-
-class FieldMapping(Base):
-    __tablename__ = "field_mappings"
-
-    mapping_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    source_field: Mapped[str] = mapped_column(String, nullable=False)
-    unified_field: Mapped[str] = mapped_column(String, nullable=False)
-    source_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("data_sources.source_id"))
-
-
-class SyncLog(Base):
-    __tablename__ = "sync_logs"
-
-    sync_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    source_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("data_sources.source_id"))
-    customer_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("customers.customer_id"))
-    records_fetched: Mapped[int] = mapped_column(Integer, default=0)
-    status: Mapped[str] = mapped_column(String, default="success")
-    synced_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-
-
 class Interaction(Base):
     __tablename__ = "interactions"
 

@@ -32,22 +32,3 @@ class Alert(Base):
     severity: Mapped[str] = mapped_column(String, default="medium")
     fired_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     acknowledged_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.user_id"))
-
-
-class NotificationChannel(Base):
-    __tablename__ = "notification_channels"
-
-    channel_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    channel_name: Mapped[str] = mapped_column(String, nullable=False)
-    delivery_method: Mapped[str] = mapped_column(String)  # email / in_app / slack
-
-
-class AlertNotification(Base):
-    __tablename__ = "alert_notifications"
-
-    alert_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("alerts.alert_id"), primary_key=True)
-    channel_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("notification_channels.channel_id"), primary_key=True
-    )
-    sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    delivery_status: Mapped[str] = mapped_column(String, default="pending")

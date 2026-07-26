@@ -14,7 +14,7 @@ flowchart LR
     end
 
     subgraph Supabase["Supabase Cloud"]
-      PG[("PostgreSQL 17<br/>34 tables · RLS")]
+      PG[("PostgreSQL 17<br/>26 tables · RLS")]
       VEC[("pgvector<br/>1024-dim embeddings")]
       AUTH["Auth · JWKS · ES256"]
       STO["Storage"]

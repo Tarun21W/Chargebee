@@ -4,9 +4,9 @@ from __future__ import annotations
 from sqlalchemy.orm import Session
 
 from app.models.admin import Permission, Role, RolePermission, User, UserRole
-from app.models.alerts import AlertRule, NotificationChannel
+from app.models.alerts import AlertRule
 from app.models.assistant import AssistantConfig
-from app.models.customer_data import DataSource, Product
+from app.models.customer_data import Product
 from app.models.risk import ScoringModel
 from app.models.summary import SummaryTemplate
 
@@ -71,15 +71,6 @@ SUMMARY_TEMPLATES = [
     ),
 ]
 
-DATA_SOURCES = [
-    ("Salesforce CRM", "CRM"),
-    ("Stripe Billing", "Billing"),
-    ("Zendesk", "Ticketing"),
-    ("Product Analytics", "Usage"),
-]
-
-CHANNELS = [("Email", "email"), ("In-App", "in_app"), ("Slack", "slack")]
-
 ALERT_RULES = [
     ("Churn risk high", "churn_score >= 70", "high"),
     ("Renewal within 30 days", "days_to_renewal <= 30", "medium"),
@@ -139,10 +130,6 @@ def seed_reference(db: Session) -> dict[str, User]:
     db.add(ScoringModel(model_name=mname, health_formula=hf, churn_formula=cf, version=ver))
 
     # Data sources / channels / alert rules
-    for sname, stype in DATA_SOURCES:
-        db.add(DataSource(source_name=sname, source_type=stype, connection_status="connected"))
-    for cname, method in CHANNELS:
-        db.add(NotificationChannel(channel_name=cname, delivery_method=method))
     for rname, cond, sev in ALERT_RULES:
         db.add(AlertRule(rule_name=rname, condition=cond, severity=sev, is_active=True))
 

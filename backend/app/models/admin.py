@@ -63,13 +63,3 @@ class AuditLog(Base):
     target_type: Mapped[str | None] = mapped_column(String)
     target_id: Mapped[str | None] = mapped_column(String)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-
-
-class DataSourceCredential(Base):
-    __tablename__ = "data_source_credentials"
-
-    credential_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    source_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("data_sources.source_id"))
-    secret_ref: Mapped[str] = mapped_column(String, nullable=False)
-    rotation_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    status: Mapped[str] = mapped_column(String, default="active")

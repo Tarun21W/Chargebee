@@ -25,7 +25,7 @@ multi-agent meeting brief, and a memory-graph search.
              │  Supabase JS (auth + simple reads)   │  REST + Bearer JWT
              ▼                                       ▼
    ┌──────── Supabase Cloud ────────┐     ┌──────── FastAPI (AI layer) ────────┐
-   │ Postgres (34 tables, truth)    │◄────┤ Intent router → structured / rag /  │
+   │ Postgres (26 tables, truth)    │◄────┤ Intent router → structured / rag /  │
    │ Auth (users, JWKS, RLS)        │     │   reasoning / agent                 │
    │ Storage · pgvector (embeds)    │     │ services: facts · summary · rag ·   │
    └────────────────────────────────┘     │   scoring · timeline · agents · llm │
@@ -115,7 +115,7 @@ hooks in `src/lib/hooks.ts`; the fetcher attaches the Supabase access token.
 
 ---
 
-## 6. Data model (34 tables, 7 modules)
+## 6. Data model (26 tables, 7 modules)
 
 - **Customer Data:** `customers, data_sources, field_mappings, sync_logs, interactions,
   tickets, ticket_messages, products, orders, order_items, subscriptions, doc_chunks`
