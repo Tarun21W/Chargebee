@@ -117,19 +117,17 @@ hooks in `src/lib/hooks.ts`; the fetcher attaches the Supabase access token.
 
 ## 6. Data model (26 tables, 7 modules)
 
-- **Customer Data:** `customers, data_sources, field_mappings, sync_logs, interactions,
-  tickets, ticket_messages, products, orders, order_items, subscriptions, doc_chunks`
-  (`doc_chunks.embedding vector(1024)` for RAG).
+- **Customer Data:** `customers, interactions, tickets, ticket_messages, products, orders,
+  order_items, subscriptions, doc_chunks` (`doc_chunks.embedding vector(1024)` for RAG).
 - **Summarisation:** `summary_templates, summaries, summary_sections`
 - **Assistant:** `assistant_configs, conversations, messages`
 - **Risk:** `scoring_models, scores, risk_factors`
-- **Alerts:** `alert_rules, alerts, notification_channels, alert_notifications`
-- **Analytics:** `report_templates, reports`
-- **Admin:** `users, roles, permissions, user_roles, role_permissions, audit_logs,
-  data_source_credentials`
+- **Alerts:** `alert_rules, alerts`
+- **Admin:** `users, roles, permissions, user_roles, role_permissions, audit_logs`
 
-RLS enabled on all tables (authenticated read; service-role writes; credentials table
-locked to service role). SQLAlchemy models in `backend/app/models/` mirror this.
+RLS enabled on all tables (authenticated read; service-role writes). SQLAlchemy models in
+`backend/app/models/` mirror this. (8 unused stub tables — connectors, notification delivery
+and reporting — were dropped; see `migrations/20260726120000_drop_unused_tables.sql`.)
 
 ---
 
