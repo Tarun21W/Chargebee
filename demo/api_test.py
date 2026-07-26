@@ -13,7 +13,7 @@ BASE = os.environ.get("SELF_URL", "http://localhost:8000")
 SUP = os.environ["SUPABASE_URL"]
 ANON = os.environ["SUPABASE_ANON_KEY"]
 EMAIL = os.environ.get("DEMO_EMAIL", "admin@pulse.ai")
-PW = os.environ.get("DEMO_PASSWORD", "Passw0rd!demo")
+PW = os.environ.get("DEMO_PASSWORD", "Pulse@123")
 
 
 def main() -> None:

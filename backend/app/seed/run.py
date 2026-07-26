@@ -21,7 +21,7 @@ from app.seed.reference import STAFF, seed_reference
 configure_logging()
 log = get_logger("app.seed")
 
-SEED_PASSWORD = "Passw0rd!demo"  # shared demo password for seeded Supabase Auth users
+SEED_PASSWORD = "Pulse@123"  # shared demo password for seeded Supabase Auth users
 
 
 def _truncate_all() -> None:

@@ -15,7 +15,7 @@ set -a; source "$ROOT/.env"; set +a
 
 BACKEND="${BACKEND_URL:-http://localhost:8000}"
 EMAIL="${DEMO_EMAIL:-admin@pulse.ai}"        # seeded admin (has all permissions)
-PASSWORD="${DEMO_PASSWORD:-Passw0rd!demo}"
+PASSWORD="${DEMO_PASSWORD:-Pulse@123}"
 
 sb() {  # sb <table> <json>  -> inserts a row, echoes the representation JSON
   curl -s -X POST "$SUPABASE_URL/rest/v1/$1" \

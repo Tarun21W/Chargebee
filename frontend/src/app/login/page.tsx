@@ -58,7 +58,7 @@ export default function LoginPage() {
             </Button>
           </form>
           <p className="mt-3 text-xs text-muted-foreground">
-            Seeded demo users use password <code>Passw0rd!demo</code>.
+            Seeded demo users use password <code>Pulse@123</code>.
           </p>
         </CardContent>
       </Card>

@@ -185,7 +185,7 @@ and reporting — were dropped; see `migrations/20260726120000_drop_unused_table
 2. Apply `supabase/migrations/*.sql` (SQL editor or CLI).
 3. `docker compose up -d --build`; pull `qwen2.5:3b` + `bge-m3` in Ollama.
 4. `docker compose exec backend python -m app.seed.run`.
-5. App → `:3000` (login `admin@pulse.ai` / `Passw0rd!demo`), API docs → `:8000/docs`,
+5. App → `:3000` (login `admin@pulse.ai` / `Pulse@123`), API docs → `:8000/docs`,
    Neo4j → `:7474`.
 
 ---
