@@ -1,0 +1,13 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - heading "Sign in" [level=3] [ref=e5]
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - textbox "Email" [ref=e8]: admin@pulse.ai
+        - textbox "Password" [ref=e9]
+        - button "Sign in" [ref=e10] [cursor=pointer]
+      - paragraph [ref=e11]:
+        - text: Seeded demo users use password
+        - code [ref=e12]: Pulse@123
+        - text: .
+  - alert [ref=e13]

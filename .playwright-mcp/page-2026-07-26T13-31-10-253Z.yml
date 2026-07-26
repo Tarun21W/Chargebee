@@ -1,0 +1,58 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e13]
+  - generic [ref=e14]:
+    - complementary [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e17]: Pulse
+        - generic [ref=e18]: Customer Intelligence
+      - navigation [ref=e19]:
+        - link "Customers" [ref=e20] [cursor=pointer]:
+          - /url: /
+        - link "Analytics" [ref=e26] [cursor=pointer]:
+          - /url: /analytics
+        - link "Alerts" [ref=e29] [cursor=pointer]:
+          - /url: /alerts
+        - link "Admin" [ref=e33] [cursor=pointer]:
+          - /url: /admin
+      - generic [ref=e36]: v0.1 · local demo
+    - generic [ref=e37]:
+      - banner [ref=e38]:
+        - button "Search… ⌘K" [ref=e39] [cursor=pointer]:
+          - generic [ref=e43]: Search…
+          - generic [ref=e44]: ⌘K
+        - generic [ref=e45]:
+          - button "Toggle light / dark mode" [ref=e46] [cursor=pointer]
+          - generic [ref=e50]:
+            - generic [ref=e51]: admin@pulse.ai
+            - button "Sign out" [ref=e52] [cursor=pointer]
+      - main [ref=e53]:
+        - generic [ref=e270]:
+          - generic [ref=e271]:
+            - link "Customers" [ref=e272] [cursor=pointer]:
+              - /url: /
+            - button "Delete" [ref=e275] [cursor=pointer]
+          - generic [ref=e280]:
+            - generic [ref=e281]:
+              - generic [ref=e282]:
+                - heading "Globex Corp" [level=1] [ref=e283]
+                - generic [ref=e284]: At-Risk
+              - generic [ref=e285]:
+                - generic [ref=e286]: Enterprise
+                - generic [ref=e287]: EMEA
+                - generic [ref=e288]: contact@globex.com
+                - generic [ref=e289]: Since 2024-09-02
+            - generic [ref=e290]:
+              - generic [ref=e291]:
+                - paragraph [ref=e292]: "6"
+                - paragraph [ref=e293]: Health
+              - generic [ref=e294]: High risk
+          - generic [ref=e295]:
+            - button "Summary" [ref=e296] [cursor=pointer]
+            - button "Timeline" [ref=e297] [cursor=pointer]
+            - button "Risk" [ref=e298] [cursor=pointer]
+            - button "Assistant" [ref=e299] [cursor=pointer]
+            - button "Brief" [ref=e300] [cursor=pointer]
+            - button "Data" [ref=e301] [cursor=pointer]
+          - generic [ref=e303]:
+            - button "Generate summary" [ref=e305] [cursor=pointer]
+            - paragraph [ref=e306]: Generate an AI summary of this customer's activity, issues and insights.

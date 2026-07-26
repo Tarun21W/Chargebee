@@ -7,7 +7,8 @@ import { Badge, riskVariant } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatCard } from "@/components/StatCard";
 import { NewCustomerDialog } from "@/components/NewCustomerDialog";
-import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
+import { Stagger, StaggerItem } from "@/components/motion";
+import { Reveal } from "@/components/gsap";
 import { useCustomers, useOverview } from "@/lib/hooks";
 
 const LIFECYCLES = ["", "At-Risk", "Active", "Onboarding"];
@@ -73,33 +74,35 @@ export default function DashboardPage() {
         </p>
       )}
 
-      {/* Customer grid */}
-      <Stagger className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {isLoading
-          ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-[86px]" />)
-          : customers.map((c) => (
-              <StaggerItem key={c.customer_id} className="h-full">
-              <Link href={`/customers/${c.customer_id}`}>
-                <Card className="h-full transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-md">
-                  <CardContent className="space-y-2 pt-4">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="truncate font-medium">{c.customer_name}</span>
-                      {c.lifecycle_stage && (
-                        <Badge variant={c.lifecycle_stage === "At-Risk" ? "high" : "muted"}>
-                          {c.lifecycle_stage}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex gap-2 text-xs text-muted-foreground">
-                      {c.segment && <span>{c.segment}</span>}
-                      {c.region && <span>· {c.region}</span>}
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-              </StaggerItem>
-            ))}
-      </Stagger>
+      {/* Customer grid — GSAP reveals cards as they scroll into view */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-[86px]" />)}
+        </div>
+      ) : (
+        <Reveal stagger={0.06} className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {customers.map((c) => (
+            <Link key={c.customer_id} href={`/customers/${c.customer_id}`} className="h-full">
+              <Card className="h-full transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-md">
+                <CardContent className="space-y-2 pt-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate font-medium">{c.customer_name}</span>
+                    {c.lifecycle_stage && (
+                      <Badge variant={c.lifecycle_stage === "At-Risk" ? "high" : "muted"}>
+                        {c.lifecycle_stage}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex gap-2 text-xs text-muted-foreground">
+                    {c.segment && <span>{c.segment}</span>}
+                    {c.region && <span>· {c.region}</span>}
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </Reveal>
+      )}
       {!isLoading && customers.length === 0 && !error && (
         <p className="text-sm text-muted-foreground">No customers match.</p>
       )}

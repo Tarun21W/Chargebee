@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { GsapInteractions } from "@/components/gsap";
 
 export const metadata: Metadata = {
-  title: "Customer Intelligence Agent",
+  title: "Pulse — Customer Intelligence Agent",
   description: "AI-powered customer summaries, risk, timeline and chat.",
 };
 
@@ -22,7 +23,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body>{children}</body>
+      <body>
+        <GsapInteractions />
+        {children}
+      </body>
     </html>
   );
 }
