@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge, riskVariant } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatCard } from "@/components/StatCard";
+import { NewCustomerDialog } from "@/components/NewCustomerDialog";
 import { useCustomers, useOverview } from "@/lib/hooks";
 
 const LIFECYCLES = ["", "At-Risk", "Active", "Onboarding"];
@@ -23,6 +24,10 @@ export default function DashboardPage() {
         <p className="text-sm text-muted-foreground">
           {overview ? `${overview.total_customers} accounts · $${overview.total_mrr.toLocaleString()} MRR` : " "}
         </p>
+      </div>
+
+      <div className="flex justify-end">
+        <NewCustomerDialog />
       </div>
 
       {/* KPI row */}

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { apiFetch } from "@/lib/api";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge, riskVariant } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,14 +25,33 @@ export default function CustomerPage() {
   const { customer, isLoading, error } = useCustomer(id);
   const { risk } = useRisk(id);
   const [tab, setTab] = useState<Tab>("Summary");
+  const [deleting, setDeleting] = useState(false);
+  const router = useRouter();
+
+  async function onDelete() {
+    if (!confirm(`Delete ${customer?.customer_name ?? "this customer"}? This removes all their data.`)) return;
+    setDeleting(true);
+    try {
+      await apiFetch(`/customers/${id}`, { method: "DELETE" });
+      router.push("/");
+    } catch (e) {
+      alert(`Delete failed: ${String(e)}`);
+      setDeleting(false);
+    }
+  }
 
   if (error) return <p className="text-sm text-risk-high">{String(error)}</p>;
 
   return (
     <div className="space-y-4">
-      <Link href="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Customers
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link href="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" /> Customers
+        </Link>
+        <Button variant="ghost" onClick={onDelete} disabled={deleting} className="text-risk-high hover:bg-risk-high/10">
+          <Trash2 className="h-4 w-4" /> {deleting ? "Deleting…" : "Delete"}
+        </Button>
+      </div>
 
       {/* Header */}
       <Card>
