@@ -36,3 +36,10 @@ Thumbs.db
 ollama_data/
 neo4j_data/
 *.log
+
+# Local notes / credentials (never commit)
+add_features.txt
+plan.txt
+keys-llama.txt
+keys*.txt
+users-baremetal.txt

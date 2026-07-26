@@ -19,7 +19,7 @@ NOW = datetime(2026, 7, 17, 12, 0, tzinfo=timezone.utc)
 
 # Facts are read by summary, chat, risk and agents — cache briefly to avoid
 # recomputing the same aggregates across a burst of requests.
-_facts_cache = TTLCache(ttl=60)
+_facts_cache = TTLCache(ttl=120)
 
 
 def invalidate_customer(customer_id: uuid.UUID) -> None:

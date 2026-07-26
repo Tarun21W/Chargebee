@@ -29,7 +29,7 @@ from app.core.cache import TTLCache
 
 # Resolved identity (user_id, roles, permissions) keyed by Supabase uid. Avoids
 # 4+ DB round-trips on every authenticated request — the dominant API latency.
-_principal_cache = TTLCache(ttl=120)
+_principal_cache = TTLCache(ttl=300)
 
 
 @lru_cache

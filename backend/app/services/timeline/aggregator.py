@@ -16,7 +16,7 @@ from app.core.cache import TTLCache
 from app.models.customer_data import Interaction, Order, Subscription, Ticket
 from app.models.risk import Score
 
-_timeline_cache = TTLCache(ttl=60)
+_timeline_cache = TTLCache(ttl=120)
 
 
 def _as_dt(value) -> datetime:

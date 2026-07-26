@@ -12,7 +12,7 @@ from app.models.customer_data import Customer, Subscription, Ticket
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
-_overview_cache = TTLCache(ttl=30)
+_overview_cache = TTLCache(ttl=90)
 
 
 @router.get("/segments")

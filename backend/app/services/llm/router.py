@@ -50,11 +50,14 @@ def chat(
     temperature: float = 0.2,
     max_tokens: int = 1024,
 ) -> str:
-    """Return the assistant text. HF primary → local Ollama fallback."""
+    """Return the assistant text. HF primary → local Ollama fallback.
+
+    The "fast" tier (intent classification, query rewrite) always runs locally —
+    it's short and latency-sensitive, so it never waits on the large HF model."""
     common = {"messages": messages, "temperature": temperature, "max_tokens": max_tokens}
 
-    # Primary: Hugging Face large model.
-    hf = _hf_kwargs()
+    # Primary: Hugging Face large model (skipped for the latency-sensitive fast tier).
+    hf = None if tier == "fast" else _hf_kwargs()
     if hf is not None:
         try:
             resp = litellm.completion(**hf, **common)

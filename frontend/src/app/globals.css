@@ -25,6 +25,23 @@
   --font-body: "Lora", Georgia, serif;
 }
 
+/* Classical — dark variant (warm charcoal, brighter gold) */
+.dark {
+  --background: 40 9% 9%;
+  --foreground: 40 20% 92%;
+  --card: 40 8% 13%;
+  --muted: 40 6% 18%;
+  --muted-foreground: 40 8% 60%;
+  --border: 40 6% 22%;
+  --primary: 36 62% 60%;
+  --primary-foreground: 40 12% 10%;
+  --accent: 36 38% 20%;
+  --ring: 36 62% 60%;
+  --sidebar: 40 10% 7%;
+  --sidebar-foreground: 40 20% 92%;
+  --sidebar-muted: 40 8% 58%;
+}
+
 * {
   border-color: hsl(var(--border));
   box-sizing: border-box;
@@ -121,6 +138,17 @@ h1, h2, h3, h4, h5, h6 {
   background: hsl(var(--accent));
   color: hsl(var(--primary));
 }
+
+/* Bell theme-toggle ring animation */
+@keyframes bell-ring {
+  0%, 100% { transform: rotate(0); }
+  15% { transform: rotate(-20deg); }
+  30% { transform: rotate(16deg); }
+  45% { transform: rotate(-12deg); }
+  60% { transform: rotate(8deg); }
+  75% { transform: rotate(-4deg); }
+}
+.bell-ring { animation: bell-ring 0.6s ease; transform-origin: 50% 12%; }
 
 /* Skeleton shimmer */
 @keyframes shimmer { 100% { transform: translateX(100%); } }
