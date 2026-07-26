@@ -54,15 +54,31 @@ def generate_summary(
     facts = build_facts(db, customer_id)
     facts_text = facts_to_text(facts)
 
+    # Authoritative CURRENT risk from the live ML model, so the summary is consistent
+    # with the header — not with stale historical score snapshots.
+    try:
+        from app.services.scoring import compute_risk
+
+        r = compute_risk(db, customer_id, persist=False)
+        facts_text += (
+            f"\nCurrent risk (live model): health {r['health_score']:.0f}, "
+            f"churn {r['churn_score']:.0f}%, level {r['risk_level']}. "
+            "Use THIS churn figure; ignore any older score values in the timeline."
+        )
+    except Exception:  # noqa: BLE001
+        pass
+
     # Retrieve supporting context (complaints, notes) for Issues/Insights.
     context_chunks = retrieve(db, customer_id, "issues complaints risks insights recent activity", k=6)
     docs_text = "\n---\n".join(c["chunk_text"] for c in context_chunks) or "(no documents retrieved)"
     citations = [{"source_type": c["source_type"], "source_id": c["source_id"]} for c in context_chunks]
 
-    # Chronological context grounds the "Activity" section.
+    # Chronological context grounds the "Activity" section — but exclude persisted
+    # score snapshots (they can be stale / from an older model) to avoid conflicts.
     from app.services.timeline import build_timeline, timeline_to_text
 
-    timeline_text = timeline_to_text(build_timeline(db, customer_id))
+    events = [e for e in build_timeline(db, customer_id) if e.get("category") != "score"]
+    timeline_text = timeline_to_text(events)
     context_text = f"RECENT TIMELINE:\n{timeline_text}\n\nDOCUMENTS:\n{docs_text}"
 
     template = db.scalar(select(SummaryTemplate).where(SummaryTemplate.team == team))
