@@ -53,7 +53,7 @@ the Supabase **session pooler** (IPv4) so containers can reach it.
 | Auth | Supabase Auth (asymmetric **ES256**, verified server-side via JWKS; HS256 fallback) |
 | DB / Vector / Storage | Supabase Postgres 17 + pgvector + Storage |
 | AI service | FastAPI (Python 3.11), SQLAlchemy 2.0 |
-| LLM runtime | Ollama (local, no cloud) — `qwen2.5:7b` (chat/summaries/agents), `qwen2.5:3b` (fast intent), `bge-m3` (embeddings, 1024-dim) via LiteLLM |
+| LLM | Ollama Cloud `gpt-oss:120b` (primary) + local Ollama `qwen2.5:7b` fallback, `bge-m3` embeddings, via LiteLLM/httpx |
 | RAG | LlamaIndex-style retrieval over pgvector (cosine) |
 | Graph | Neo4j 5 Community |
 | Perf | In-memory TTL cache (backend), composite indexes (DB), SWR (client) |

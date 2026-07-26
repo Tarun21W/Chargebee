@@ -64,19 +64,20 @@ and complaints, key insights, and churn risk — from structured data + LLMs, an
 | **Database** | Supabase **PostgreSQL 17** — single source of truth, 26 tables |
 | **Vector search** | **pgvector** (1024-dim, cosine) inside Supabase |
 | **Backend / AI** | **FastAPI** (Python 3.11), SQLAlchemy 2.0 |
-| **LLM (local)** | **Ollama** — `qwen2.5:7b` (chat/summaries/agents) · `qwen2.5:3b` (fast intent) · `bge-m3` embeddings |
-| **Model routing** | **LiteLLM** — local Ollama only, fully offline (no cloud) |
+| **LLM (primary)** | **Ollama Cloud** — `gpt-oss:120b` (hosted, high quality) |
+| **LLM (fallback)** | **Ollama (local)** — `qwen2.5:7b` (offline / on cloud failure) · `bge-m3` embeddings |
+| **Model routing** | Ollama Cloud primary → local Ollama fallback |
 | **Graph database** | **Neo4j 5** (customer memory graph) |
 | **Performance** | in-memory TTL cache · DB indexes · SWR client cache · same-origin API proxy |
 | **Deployment** | **Docker Compose** |
 
-**Model notes** — fully local (Ollama), sized for a 16GB laptop, no cloud:
+**Model notes** — hosted primary for quality, local fallback for resilience:
 
-| Model | Role | Params | Context |
-|---|---|:--:|:--:|
-| Qwen2.5-7B-Instruct | summaries · chat · agents (quality) | 7.6B | 128K |
-| Qwen2.5-3B-Instruct | intent classification (fast) | 3.1B | 32K |
-| BGE-M3 | embeddings (RAG) | 568M | 8192 |
+| Model | Role | Params |
+|---|---|:--:|
+| gpt-oss:120b (Ollama Cloud) | **primary** — chat · summaries · agents | 120B |
+| Qwen2.5-7B-Instruct (local Ollama) | fallback — offline / on cloud failure | 7.6B |
+| BGE-M3 (local) | embeddings (RAG) | 568M |
 
 ---
 
@@ -129,8 +130,8 @@ cp .env.example .env
 
 # 3. Start all services
 docker compose up -d --build
-docker compose exec ollama ollama pull qwen2.5:7b
-docker compose exec ollama ollama pull qwen2.5:3b
+# (LLM primary is Ollama Cloud via OLLAMA_CLOUD_API_KEY in .env)
+docker compose exec ollama ollama pull qwen2.5:7b   # local fallback
 docker compose exec ollama ollama pull bge-m3
 
 # 4. Seed synthetic data (customers, tickets, orders, embeddings, graph, auth users)

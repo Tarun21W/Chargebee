@@ -20,11 +20,11 @@ class Settings(BaseSettings):
 
     # Ollama / LLM
     ollama_base_url: str = "http://localhost:11434"
-    # Local-only models (Ollama). fast = small model for intent/classification;
-    # primary/heavy = the quality model for chat, summaries and agents.
-    llm_fast_model: str = "qwen2.5:3b"
-    llm_primary_model: str = "qwen2.5:7b"
-    llm_heavy_model: str = "qwen2.5:7b"
+    # Primary: Ollama Cloud (hosted, high quality). Fallback: local Ollama model.
+    ollama_cloud_base_url: str = "https://ollama.com/v1"
+    ollama_cloud_api_key: str = ""
+    ollama_cloud_model: str = "gpt-oss:120b"
+    llm_fallback_model: str = "qwen2.5:7b"
     embed_model: str = "bge-m3"
     embed_dim: int = 1024
 
